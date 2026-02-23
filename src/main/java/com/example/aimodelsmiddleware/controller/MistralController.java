@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/mistral") // Ruta final: /api/v1/mistral/generate
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/mistral")
 @Tag(name = "Mistral AI", description = "Endpoints para interactuar con Mistral Large")
 public class MistralController {
 

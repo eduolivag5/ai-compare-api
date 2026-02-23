@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/groq") // Ruta final: /api/v1/groq/generate
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/groq")
 @Tag(name = "Groq (Meta Llama)", description = "Endpoints para interactuar con Llama 3.3 vía Groq")
 public class GroqController {
 

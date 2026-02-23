@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/gemini") // La ruta final será /api/v1/gemini/generate
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/gemini")
 @Tag(name = "Google Gemini", description = "Endpoints para interactuar con Gemini 2.5 Flash")
 public class GeminiController {
 

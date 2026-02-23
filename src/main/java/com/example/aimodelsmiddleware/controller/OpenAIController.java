@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/openai") // Ruta final: /api/v1/openai/generate
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/openai")
 @Tag(name = "OpenAI", description = "Endpoints para interactuar con GPT-4o-mini")
 public class OpenAIController {
 
