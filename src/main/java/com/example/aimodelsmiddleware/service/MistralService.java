@@ -1,0 +1,57 @@
+package com.example.aimodelsmiddleware.service;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.util.Map;
+import java.util.List;
+
+@Service
+public class MistralService {
+
+    @Value("${mistral.api.key}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate;
+    private final String MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions";
+
+    public MistralService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public String getResponse(String prompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey); // Mistral usa Authorization: Bearer
+
+        // Cuerpo para Mistral: { "model": "...", "messages": [{"role": "user", "content": "..."}] }
+        Map<String, Object> message = Map.of("role", "user", "content", prompt);
+        Map<String, Object> body = Map.of(
+                "model", "mistral-large-latest",
+                "messages", List.of(message)
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            Map<String, Object> response = restTemplate.postForObject(MISTRAL_URL, request, Map.class);
+            return extractTextFromMistral(response);
+        } catch (Exception e) {
+            return "Error al contactar con Mistral: " + e.getMessage();
+        }
+    }
+
+    private String extractTextFromMistral(Map<String, Object> response) {
+        try {
+            List choices = (List) response.get("choices");
+            Map firstChoice = (Map) choices.get(0);
+            Map message = (Map) firstChoice.get("message");
+            return (String) message.get("content");
+        } catch (Exception e) {
+            return response.toString();
+        }
+    }
+}
