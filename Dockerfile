@@ -1,27 +1,25 @@
-# --- Etapa 1: Build con Maven ---
-FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
+# Etapa 1: Build (Usando imágenes estándar para evitar errores de codificación)
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copiamos solo el pom.xml primero para descargar las dependencias.
-# Esto hace que si cambias el código pero no las librerías,
-# Docker use la caché y no tenga que descargar todo de nuevo.
+# Aprovechamos la caché de Docker para las dependencias
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Ahora copiamos el código fuente y compilamos
+# Copiamos el código y compilamos
 COPY src ./src
-RUN mvn clean package -DskipTests
+# Forzamos UTF-8 durante el build
+RUN mvn clean package -DskipTests -Dfile.encoding=UTF-8
 
-# --- Etapa 2: Runtime con Java 21 ---
-FROM eclipse-temurin:21-jre-alpine
+# Etapa 2: Runtime (Ligera pero compatible)
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Copiamos el JAR generado en la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Render asigna el puerto dinámicamente en la variable $PORT
 ENV PORT=8080
 EXPOSE 8080
 
-# Límites de memoria para evitar que el plan gratuito de Render mate el proceso
-ENTRYPOINT ["java", "-Xmx380m", "-Xms380m", "-jar", "app.jar", "--server.port=${PORT}"]
+# Usamos sh -c para que la variable ${PORT} se lea correctamente
+# Añadimos los límites de memoria que son vitales en Render
+ENTRYPOINT ["sh", "-c", "java -Xmx380m -Xms380m -jar app.jar --server.port=${PORT}"]
