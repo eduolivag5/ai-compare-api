@@ -22,8 +22,6 @@ public class GeminiService {
         this.restTemplate = restTemplate;
     }
 
-    // Cambiamos la URL: Asegúrate de que el nombre del modelo sea correcto
-    // v1beta funciona bien para gemini-1.5-flash
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
 
     public String getResponse(String prompt) {
