@@ -35,15 +35,26 @@ public class Gemma4Service {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> part = Map.of("text", prompt);
+        // Instrucción de sistema para evitar que el modelo muestre su razonamiento interno
+        String systemInstruction = "Actúa como un asistente de chat directo. " +
+                "Responde únicamente con el texto de la respuesta final en el mismo idioma del usuario. " +
+                "PROHIBIDO incluir etiquetas como 'Input:', 'Intent:', 'Análisis:' o listas de opciones de respuesta. " +
+                "Ve directo al grano.";
+
+        // Construimos el mensaje final combinando la instrucción y la pregunta
+        String finalPrompt = systemInstruction + "\n\nPregunta del usuario: " + prompt;
+
+        // IMPORTANTE: Aquí usamos finalPrompt en lugar de prompt
+        Map<String, Object> part = Map.of("text", finalPrompt);
         Map<String, Object> content = Map.of("parts", List.of(part));
 
         Map<String, Object> generationConfig = Map.of(
-                "temperature", 0.7,
+                "temperature", 0.7, // Mantiene la respuesta creativa pero controlada
                 "topP", 0.95,
                 "maxOutputTokens", 4096
         );
 
+        // El cuerpo de la petición con los contenidos y la configuración
         Map<String, Object> body = Map.of(
                 "contents", List.of(content),
                 "generationConfig", generationConfig
@@ -52,6 +63,8 @@ public class Gemma4Service {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
+            // Enviamos la petición al endpoint de Google (Gemma 4)
+            @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.postForObject(GEMMA_URL + apiKey, request, Map.class);
             return extractTextFromResponse(response);
         } catch (Exception e) {
